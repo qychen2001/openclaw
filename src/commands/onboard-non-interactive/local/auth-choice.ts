@@ -1,5 +1,10 @@
 import { upsertAuthProfile } from "../../../agents/auth-profiles.js";
 import { normalizeProviderId } from "../../../agents/model-selection.js";
+import {
+  discoverSiliconflowModels,
+  SILICONFLOW_BASE_URL,
+  SILICONFLOW_CN_BASE_URL,
+} from "../../../agents/siliconflow-models.js";
 import { parseDurationMs } from "../../../cli/parse-duration.js";
 import type { OpenClawConfig } from "../../../config/config.js";
 import type { SecretInput } from "../../../config/types.secrets.js";
@@ -27,6 +32,8 @@ import {
   applyVeniceConfig,
   applyTogetherConfig,
   applyHuggingfaceConfig,
+  applySiliconflowConfig,
+  applySiliconflowConfigCn,
   applyVercelAiGatewayConfig,
   applyLitellmConfig,
   applyMistralConfig,
@@ -47,6 +54,8 @@ import {
   setOpenaiApiKey,
   setOpencodeZenApiKey,
   setOpenrouterApiKey,
+  setSiliconflowApiKey,
+  setSiliconflowCnApiKey,
   setSyntheticApiKey,
   setVolcengineApiKey,
   setXaiApiKey,
@@ -920,6 +929,66 @@ export async function applyNonInteractiveAuthChoice(params: {
       mode: "api_key",
     });
     return applyHuggingfaceConfig(nextConfig);
+  }
+
+  if (authChoice === "siliconflow-api-key" || authChoice === "siliconflow-api-key-cn") {
+    const isCn = authChoice === "siliconflow-api-key-cn";
+    const provider = isCn ? "siliconflow-cn" : "siliconflow";
+    const modelId = (isCn ? opts.siliconflowCnModelId : opts.siliconflowModelId)?.trim();
+    if (!modelId) {
+      runtime.error(
+        isCn
+          ? "Missing --siliconflow-cn-model-id for --auth-choice siliconflow-api-key-cn."
+          : "Missing --siliconflow-model-id for --auth-choice siliconflow-api-key.",
+      );
+      runtime.exit(1);
+      return null;
+    }
+
+    const resolved = await resolveApiKey({
+      provider,
+      cfg: baseConfig,
+      flagValue: isCn ? opts.siliconflowCnApiKey : opts.siliconflowApiKey,
+      flagName: isCn ? "--siliconflow-cn-api-key" : "--siliconflow-api-key",
+      envVar: isCn ? "SILICONFLOW_CN_API_KEY" : "SILICONFLOW_API_KEY",
+      runtime,
+    });
+    if (!resolved) {
+      return null;
+    }
+    if (
+      !(await maybeSetResolvedApiKey(resolved, (value) =>
+        isCn
+          ? setSiliconflowCnApiKey(value, undefined, apiKeyStorageOptions)
+          : setSiliconflowApiKey(value, undefined, apiKeyStorageOptions),
+      ))
+    ) {
+      return null;
+    }
+
+    nextConfig = applyAuthProfileConfig(nextConfig, {
+      profileId: `${provider}:default`,
+      provider,
+      mode: "api_key",
+    });
+
+    const baseUrl = isCn ? SILICONFLOW_CN_BASE_URL : SILICONFLOW_BASE_URL;
+    const discovered = await discoverSiliconflowModels({ baseUrl, apiKey: resolved.key });
+    const selectedModel = discovered.find((model) => model.id === modelId);
+    if (!selectedModel) {
+      runtime.error(
+        [
+          `Model id "${modelId}" not found in ${provider} catalog.`,
+          "Run interactive onboarding to pick a model from the discovered list.",
+        ].join("\n"),
+      );
+      runtime.exit(1);
+      return null;
+    }
+
+    return isCn
+      ? applySiliconflowConfigCn(nextConfig, { model: selectedModel })
+      : applySiliconflowConfig(nextConfig, { model: selectedModel });
   }
 
   if (authChoice === "custom-api-key") {

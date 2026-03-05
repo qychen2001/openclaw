@@ -349,7 +349,7 @@ describe("applyExtraParamsToAgent", () => {
     expect(payloads[0]).not.toHaveProperty("reasoning_effort");
   });
 
-  it("normalizes thinking=off to null for SiliconFlow Pro models", () => {
+  it("normalizes thinking=off to null for SiliconFlow-CN Pro models", () => {
     const payloads: Record<string, unknown>[] = [];
     const baseStreamFn: StreamFn = (_model, _context, options) => {
       const payload: Record<string, unknown> = { thinking: "off" };
@@ -362,7 +362,7 @@ describe("applyExtraParamsToAgent", () => {
     applyExtraParamsToAgent(
       agent,
       undefined,
-      "siliconflow",
+      "siliconflow-cn",
       "Pro/MiniMaxAI/MiniMax-M2.5",
       undefined,
       "off",
@@ -370,7 +370,7 @@ describe("applyExtraParamsToAgent", () => {
 
     const model = {
       api: "openai-completions",
-      provider: "siliconflow",
+      provider: "siliconflow-cn",
       id: "Pro/MiniMaxAI/MiniMax-M2.5",
     } as Model<"openai-completions">;
     const context: Context = { messages: [] };

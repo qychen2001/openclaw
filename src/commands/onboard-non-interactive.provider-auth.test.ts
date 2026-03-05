@@ -2,6 +2,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { beforeAll, describe, expect, it, vi } from "vitest";
+import { SILICONFLOW_BASE_URL, SILICONFLOW_CN_BASE_URL } from "../agents/siliconflow-models.js";
 import { makeTempWorkspace } from "../test-helpers/workspace.js";
 import { withEnvAsync } from "../test-utils/env.js";
 import { MINIMAX_API_BASE_URL, MINIMAX_CN_API_BASE_URL } from "./onboard-auth.js";
@@ -554,6 +555,70 @@ describe("onboard (non-interactive): provider auth", () => {
         provider: "together",
         key: "together-test-key",
       });
+    });
+  });
+
+  it("stores SiliconFlow API key, configures provider, and sets selected model as default", async () => {
+    await withOnboardEnv("openclaw-onboard-siliconflow-", async (env) => {
+      const cfg = await runOnboardingAndReadConfig(env, {
+        authChoice: "siliconflow-api-key",
+        siliconflowApiKey: "sf-test-key",
+        siliconflowModelId: "deepseek-ai/DeepSeek-R1",
+      });
+
+      expect(cfg.auth?.profiles?.["siliconflow:default"]?.provider).toBe("siliconflow");
+      expect(cfg.auth?.profiles?.["siliconflow:default"]?.mode).toBe("api_key");
+      expect(cfg.models?.providers?.siliconflow?.baseUrl).toBe(SILICONFLOW_BASE_URL);
+      expect(cfg.models?.providers?.siliconflow?.api).toBe("openai-completions");
+      expect(cfg.agents?.defaults?.model?.primary).toBe("siliconflow/deepseek-ai/DeepSeek-R1");
+      await expectApiKeyProfile({
+        profileId: "siliconflow:default",
+        provider: "siliconflow",
+        key: "sf-test-key",
+      });
+    });
+  });
+
+  it("stores SiliconFlow CN API key, configures provider, and sets selected model as default", async () => {
+    await withOnboardEnv("openclaw-onboard-siliconflow-cn-", async (env) => {
+      const cfg = await runOnboardingAndReadConfig(env, {
+        authChoice: "siliconflow-api-key-cn",
+        siliconflowCnApiKey: "sfcn-test-key",
+        siliconflowCnModelId: "Qwen/Qwen2.5-72B-Instruct",
+      });
+
+      expect(cfg.auth?.profiles?.["siliconflow-cn:default"]?.provider).toBe("siliconflow-cn");
+      expect(cfg.auth?.profiles?.["siliconflow-cn:default"]?.mode).toBe("api_key");
+      expect(cfg.models?.providers?.["siliconflow-cn"]?.baseUrl).toBe(SILICONFLOW_CN_BASE_URL);
+      expect(cfg.models?.providers?.["siliconflow-cn"]?.api).toBe("openai-completions");
+      expect(cfg.agents?.defaults?.model?.primary).toBe("siliconflow-cn/Qwen/Qwen2.5-72B-Instruct");
+      await expectApiKeyProfile({
+        profileId: "siliconflow-cn:default",
+        provider: "siliconflow-cn",
+        key: "sfcn-test-key",
+      });
+    });
+  });
+
+  it("rejects SiliconFlow non-interactive auth choices without explicit model id flags", async () => {
+    await withOnboardEnv("openclaw-onboard-siliconflow-missing-model-", async ({ runtime }) => {
+      await expect(
+        runNonInteractiveOnboardingWithDefaults(runtime, {
+          authChoice: "siliconflow-api-key",
+          siliconflowApiKey: "sf-test-key",
+          skipSkills: true,
+        }),
+      ).rejects.toThrow("Missing --siliconflow-model-id for --auth-choice siliconflow-api-key.");
+
+      await expect(
+        runNonInteractiveOnboardingWithDefaults(runtime, {
+          authChoice: "siliconflow-api-key-cn",
+          siliconflowCnApiKey: "sfcn-test-key",
+          skipSkills: true,
+        }),
+      ).rejects.toThrow(
+        "Missing --siliconflow-cn-model-id for --auth-choice siliconflow-api-key-cn.",
+      );
     });
   });
 

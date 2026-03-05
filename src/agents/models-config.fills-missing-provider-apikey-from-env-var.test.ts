@@ -172,6 +172,47 @@ describe("models-config", () => {
       });
     });
   });
+
+  it("generates implicit SiliconFlow provider config when SILICONFLOW_API_KEY is set", async () => {
+    await withTempHome(async () => {
+      await withEnvVar("SILICONFLOW_API_KEY", "sk-siliconflow-test", async () => {
+        await ensureOpenClawModelsJson({});
+
+        const parsed = await readGeneratedModelsJson<{
+          providers: Record<
+            string,
+            { baseUrl?: string; api?: string; apiKey?: string; models?: Array<{ id: string }> }
+          >;
+        }>();
+
+        expect(parsed.providers.siliconflow?.baseUrl).toBe("https://api.siliconflow.com/v1");
+        expect(parsed.providers.siliconflow?.api).toBe("openai-completions");
+        expect(parsed.providers.siliconflow?.apiKey).toBe("SILICONFLOW_API_KEY");
+        expect(parsed.providers.siliconflow?.models?.length).toBeGreaterThan(0);
+      });
+    });
+  });
+
+  it("generates implicit SiliconFlow CN provider config when SILICONFLOW_CN_API_KEY is set", async () => {
+    await withTempHome(async () => {
+      await withEnvVar("SILICONFLOW_CN_API_KEY", "sk-siliconflow-cn-test", async () => {
+        await ensureOpenClawModelsJson({});
+
+        const parsed = await readGeneratedModelsJson<{
+          providers: Record<
+            string,
+            { baseUrl?: string; api?: string; apiKey?: string; models?: Array<{ id: string }> }
+          >;
+        }>();
+
+        expect(parsed.providers["siliconflow-cn"]?.baseUrl).toBe("https://api.siliconflow.cn/v1");
+        expect(parsed.providers["siliconflow-cn"]?.api).toBe("openai-completions");
+        expect(parsed.providers["siliconflow-cn"]?.apiKey).toBe("SILICONFLOW_CN_API_KEY");
+        expect(parsed.providers["siliconflow-cn"]?.models?.length).toBeGreaterThan(0);
+      });
+    });
+  });
+
   it("merges providers by default", async () => {
     await withTempHome(async () => {
       await writeAgentModelsJson({

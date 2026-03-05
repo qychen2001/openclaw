@@ -11,6 +11,7 @@ import {
   QIANFAN_DEFAULT_MODEL_ID,
   XIAOMI_DEFAULT_MODEL_ID,
 } from "../agents/models-config.providers.js";
+import { SILICONFLOW_BASE_URL, SILICONFLOW_CN_BASE_URL } from "../agents/siliconflow-models.js";
 import {
   buildSyntheticModelDefinition,
   SYNTHETIC_BASE_URL,
@@ -29,7 +30,7 @@ import {
   VENICE_MODEL_CATALOG,
 } from "../agents/venice-models.js";
 import type { OpenClawConfig } from "../config/config.js";
-import type { ModelApi } from "../config/types.models.js";
+import type { ModelApi, ModelDefinitionConfig } from "../config/types.models.js";
 import { KILOCODE_BASE_URL } from "../providers/kilocode-shared.js";
 import {
   HUGGINGFACE_DEFAULT_MODEL_REF,
@@ -383,6 +384,66 @@ export function applyHuggingfaceProviderConfig(cfg: OpenClawConfig): OpenClawCon
 export function applyHuggingfaceConfig(cfg: OpenClawConfig): OpenClawConfig {
   const next = applyHuggingfaceProviderConfig(cfg);
   return applyAgentDefaultModelPrimary(next, HUGGINGFACE_DEFAULT_MODEL_REF);
+}
+
+export function applySiliconflowProviderConfig(
+  cfg: OpenClawConfig,
+  params: { model: ModelDefinitionConfig },
+): OpenClawConfig {
+  const modelRef = `siliconflow/${params.model.id}`;
+  const models = { ...cfg.agents?.defaults?.models };
+  models[modelRef] = {
+    ...models[modelRef],
+    alias: models[modelRef]?.alias ?? params.model.name ?? "SiliconFlow",
+  };
+
+  return applyProviderConfigWithDefaultModel(cfg, {
+    agentModels: models,
+    providerId: "siliconflow",
+    api: "openai-completions",
+    baseUrl: SILICONFLOW_BASE_URL,
+    defaultModel: params.model,
+    defaultModelId: params.model.id,
+  });
+}
+
+export function applySiliconflowConfig(
+  cfg: OpenClawConfig,
+  params: { model: ModelDefinitionConfig },
+): OpenClawConfig {
+  const modelRef = `siliconflow/${params.model.id}`;
+  const next = applySiliconflowProviderConfig(cfg, params);
+  return applyAgentDefaultModelPrimary(next, modelRef);
+}
+
+export function applySiliconflowProviderConfigCn(
+  cfg: OpenClawConfig,
+  params: { model: ModelDefinitionConfig },
+): OpenClawConfig {
+  const modelRef = `siliconflow-cn/${params.model.id}`;
+  const models = { ...cfg.agents?.defaults?.models };
+  models[modelRef] = {
+    ...models[modelRef],
+    alias: models[modelRef]?.alias ?? params.model.name ?? "SiliconFlow",
+  };
+
+  return applyProviderConfigWithDefaultModel(cfg, {
+    agentModels: models,
+    providerId: "siliconflow-cn",
+    api: "openai-completions",
+    baseUrl: SILICONFLOW_CN_BASE_URL,
+    defaultModel: params.model,
+    defaultModelId: params.model.id,
+  });
+}
+
+export function applySiliconflowConfigCn(
+  cfg: OpenClawConfig,
+  params: { model: ModelDefinitionConfig },
+): OpenClawConfig {
+  const modelRef = `siliconflow-cn/${params.model.id}`;
+  const next = applySiliconflowProviderConfigCn(cfg, params);
+  return applyAgentDefaultModelPrimary(next, modelRef);
 }
 
 export function applyXaiProviderConfig(cfg: OpenClawConfig): OpenClawConfig {

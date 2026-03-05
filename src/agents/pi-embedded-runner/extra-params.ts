@@ -530,7 +530,7 @@ function shouldApplySiliconFlowThinkingOffCompat(params: {
   thinkingLevel?: ThinkLevel;
 }): boolean {
   return (
-    params.provider === "siliconflow" &&
+    params.provider === "siliconflow-cn" &&
     params.thinkingLevel === "off" &&
     params.modelId.startsWith("Pro/")
   );

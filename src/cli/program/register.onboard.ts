@@ -92,6 +92,16 @@ export function registerOnboardCommand(program: Command) {
   }
 
   command
+    .option(
+      "--siliconflow-model-id <id>",
+      "SiliconFlow model id (non-interactive; required for --auth-choice siliconflow-api-key)",
+    )
+    .option(
+      "--siliconflow-cn-model-id <id>",
+      "SiliconFlow model id (.cn) (non-interactive; required for --auth-choice siliconflow-api-key-cn)",
+    );
+
+  command
     .option("--custom-base-url <url>", "Custom provider base URL")
     .option("--custom-api-key <key>", "Custom provider API key (optional)")
     .option("--custom-model-id <id>", "Custom provider model ID")
@@ -165,6 +175,10 @@ export function registerOnboardCommand(program: Command) {
           litellmApiKey: opts.litellmApiKey as string | undefined,
           volcengineApiKey: opts.volcengineApiKey as string | undefined,
           byteplusApiKey: opts.byteplusApiKey as string | undefined,
+          siliconflowApiKey: opts.siliconflowApiKey as string | undefined,
+          siliconflowCnApiKey: opts.siliconflowCnApiKey as string | undefined,
+          siliconflowModelId: opts.siliconflowModelId as string | undefined,
+          siliconflowCnModelId: opts.siliconflowCnModelId as string | undefined,
           customBaseUrl: opts.customBaseUrl as string | undefined,
           customApiKey: opts.customApiKey as string | undefined,
           customModelId: opts.customModelId as string | undefined,

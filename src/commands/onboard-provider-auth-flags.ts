@@ -25,6 +25,8 @@ type OnboardProviderAuthOptionKey = keyof Pick<
   | "qianfanApiKey"
   | "volcengineApiKey"
   | "byteplusApiKey"
+  | "siliconflowApiKey"
+  | "siliconflowCnApiKey"
 >;
 
 export type OnboardProviderAuthFlag = {
@@ -197,5 +199,19 @@ export const ONBOARD_PROVIDER_AUTH_FLAGS: ReadonlyArray<OnboardProviderAuthFlag>
     cliFlag: "--byteplus-api-key",
     cliOption: "--byteplus-api-key <key>",
     description: "BytePlus API key",
+  },
+  {
+    optionKey: "siliconflowApiKey",
+    authChoice: "siliconflow-api-key",
+    cliFlag: "--siliconflow-api-key",
+    cliOption: "--siliconflow-api-key <key>",
+    description: "SiliconFlow API key",
+  },
+  {
+    optionKey: "siliconflowCnApiKey",
+    authChoice: "siliconflow-api-key-cn",
+    cliFlag: "--siliconflow-cn-api-key",
+    cliOption: "--siliconflow-cn-api-key <key>",
+    description: "SiliconFlow API key (.cn)",
   },
 ];

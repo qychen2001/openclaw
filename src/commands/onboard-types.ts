@@ -48,6 +48,8 @@ export type AuthChoice =
   | "mistral-api-key"
   | "volcengine-api-key"
   | "byteplus-api-key"
+  | "siliconflow-api-key"
+  | "siliconflow-api-key-cn"
   | "qianfan-api-key"
   | "custom-api-key"
   | "skip";
@@ -78,6 +80,7 @@ export type AuthChoiceGroupId =
   | "xai"
   | "volcengine"
   | "byteplus"
+  | "siliconflow"
   | "custom";
 export type GatewayAuthChoice = "token" | "password";
 export type ResetScope = "config" | "config+creds+sessions" | "full";
@@ -134,6 +137,10 @@ export type OnboardOptions = {
   xaiApiKey?: string;
   volcengineApiKey?: string;
   byteplusApiKey?: string;
+  siliconflowApiKey?: string;
+  siliconflowCnApiKey?: string;
+  siliconflowModelId?: string;
+  siliconflowCnModelId?: string;
   qianfanApiKey?: string;
   customBaseUrl?: string;
   customApiKey?: string;

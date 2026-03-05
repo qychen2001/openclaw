@@ -44,6 +44,8 @@ const PREFERRED_PROVIDER_BY_AUTH_CHOICE: Partial<Record<AuthChoice, string>> = {
   "qwen-portal": "qwen-portal",
   "volcengine-api-key": "volcengine",
   "byteplus-api-key": "byteplus",
+  "siliconflow-api-key": "siliconflow",
+  "siliconflow-api-key-cn": "siliconflow-cn",
   "minimax-portal": "minimax-portal",
   "qianfan-api-key": "qianfan",
   "custom-api-key": "custom",

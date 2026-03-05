@@ -224,6 +224,30 @@ export async function setOpenaiApiKey(
   });
 }
 
+export async function setSiliconflowApiKey(
+  key: SecretInput,
+  agentDir?: string,
+  options?: ApiKeyStorageOptions,
+) {
+  upsertAuthProfile({
+    profileId: "siliconflow:default",
+    credential: buildApiKeyCredential("siliconflow", key, undefined, options),
+    agentDir: resolveAuthAgentDir(agentDir),
+  });
+}
+
+export async function setSiliconflowCnApiKey(
+  key: SecretInput,
+  agentDir?: string,
+  options?: ApiKeyStorageOptions,
+) {
+  upsertAuthProfile({
+    profileId: "siliconflow-cn:default",
+    credential: buildApiKeyCredential("siliconflow-cn", key, undefined, options),
+    agentDir: resolveAuthAgentDir(agentDir),
+  });
+}
+
 export async function setGeminiApiKey(
   key: SecretInput,
   agentDir?: string,

@@ -43,6 +43,11 @@ import {
 import { resolveAwsSdkEnvVarName, resolveEnvApiKey } from "./model-auth.js";
 import { OLLAMA_NATIVE_BASE_URL } from "./ollama-stream.js";
 import {
+  discoverSiliconflowModels,
+  SILICONFLOW_BASE_URL,
+  SILICONFLOW_CN_BASE_URL,
+} from "./siliconflow-models.js";
+import {
   buildSyntheticModelDefinition,
   SYNTHETIC_BASE_URL,
   SYNTHETIC_MODEL_CATALOG,
@@ -796,6 +801,28 @@ async function buildHuggingfaceProvider(apiKey?: string): Promise<ProviderConfig
   };
 }
 
+async function buildSiliconflowProvider(params: {
+  baseUrl: string;
+  apiKeyForConfig: string;
+}): Promise<ProviderConfig> {
+  const apiKeyForConfig = params.apiKeyForConfig.trim();
+  const resolvedSecret =
+    apiKeyForConfig !== ""
+      ? /^[A-Z][A-Z0-9_]*$/.test(apiKeyForConfig)
+        ? (process.env[apiKeyForConfig] ?? "").trim()
+        : apiKeyForConfig
+      : "";
+  const models = await discoverSiliconflowModels({
+    baseUrl: params.baseUrl,
+    apiKey: resolvedSecret,
+  });
+  return {
+    baseUrl: params.baseUrl,
+    api: "openai-completions",
+    models,
+  };
+}
+
 function buildTogetherProvider(): ProviderConfig {
   return {
     baseUrl: TOGETHER_BASE_URL,
@@ -1134,6 +1161,32 @@ export async function resolveImplicitProviders(params: {
     resolveApiKeyFromProfiles({ provider: "kilocode", store: authStore });
   if (kilocodeKey) {
     providers.kilocode = { ...buildKilocodeProvider(), apiKey: kilocodeKey };
+  }
+
+  const siliconflowKey =
+    resolveEnvApiKeyVarName("siliconflow") ??
+    resolveApiKeyFromProfiles({ provider: "siliconflow", store: authStore });
+  if (siliconflowKey) {
+    providers.siliconflow = {
+      ...(await buildSiliconflowProvider({
+        baseUrl: SILICONFLOW_BASE_URL,
+        apiKeyForConfig: siliconflowKey,
+      })),
+      apiKey: siliconflowKey,
+    };
+  }
+
+  const siliconflowCnKey =
+    resolveEnvApiKeyVarName("siliconflow-cn") ??
+    resolveApiKeyFromProfiles({ provider: "siliconflow-cn", store: authStore });
+  if (siliconflowCnKey) {
+    providers["siliconflow-cn"] = {
+      ...(await buildSiliconflowProvider({
+        baseUrl: SILICONFLOW_CN_BASE_URL,
+        apiKeyForConfig: siliconflowCnKey,
+      })),
+      apiKey: siliconflowCnKey,
+    };
   }
 
   return providers;

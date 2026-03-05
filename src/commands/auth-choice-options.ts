@@ -90,6 +90,12 @@ const AUTH_CHOICE_GROUP_DEFS: {
     choices: ["byteplus-api-key"],
   },
   {
+    value: "siliconflow",
+    label: "SiliconFlow",
+    hint: "OpenAI-compatible",
+    choices: ["siliconflow-api-key", "siliconflow-api-key-cn"],
+  },
+  {
     value: "openrouter",
     label: "OpenRouter",
     hint: "API key",

@@ -212,6 +212,28 @@ Kimi K2 model IDs:
 }
 ```
 
+### SiliconFlow
+
+SiliconFlow provides OpenAI-compatible chat completions. OpenClaw supports two endpoints:
+
+- Providers:
+  - `siliconflow` (`SILICONFLOW_API_KEY`, base URL `https://api.siliconflow.com/v1`)
+  - `siliconflow-cn` (`SILICONFLOW_CN_API_KEY`, base URL `https://api.siliconflow.cn/v1`)
+- CLI (interactive):
+  - `openclaw onboard --auth-choice siliconflow-api-key`
+  - `openclaw onboard --auth-choice siliconflow-api-key-cn`
+- CLI (non-interactive requires explicit model id):
+  - `openclaw onboard --non-interactive --accept-risk --auth-choice siliconflow-api-key --siliconflow-api-key "$SILICONFLOW_API_KEY" --siliconflow-model-id "deepseek-ai/DeepSeek-R1"`
+  - `openclaw onboard --non-interactive --accept-risk --auth-choice siliconflow-api-key-cn --siliconflow-cn-api-key "$SILICONFLOW_CN_API_KEY" --siliconflow-cn-model-id "deepseek-ai/DeepSeek-R1"`
+
+```json5
+{
+  agents: {
+    defaults: { model: { primary: "siliconflow/deepseek-ai/DeepSeek-R1" } },
+  },
+}
+```
+
 ### Kimi Coding
 
 Kimi Coding uses Moonshot AI's Anthropic-compatible endpoint:
